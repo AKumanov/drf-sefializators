@@ -1,14 +1,10 @@
 from django.contrib.auth.models import User
-from django.http import Http404
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-from rest_framework.views import APIView
 from rest_framework.decorators import api_view, action
-from tutorial.models import Snippet
+from tutorial.models import Snippet, Orders
 from tutorial import permissions as custom_permissions
-from tutorial.serializers import SnippetSerializer, UserSerializer
-from rest_framework import mixins, generics
+from tutorial.serializers import SnippetSerializer, UserSerializer, OrderSerializer
 from rest_framework import permissions
 from rest_framework import renderers
 from rest_framework import viewsets
@@ -19,6 +15,7 @@ def api_root(request, format=None):
     return Response({
         'snippets': reverse('snippet-list', request=request, format=format),
         'users': reverse('user-list', request=request, format=format),
+        'orders': reverse('orders-list', request=request, format=format),
     })
 
 
@@ -49,3 +46,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    serializer_class = OrderSerializer
+    queryset = Orders.objects.all()

@@ -60,3 +60,36 @@ class Snippet(models.Model):
     class Meta:
         ordering = ['created']
 
+
+class Package(models.Model):
+    _PACKAGE_NAME_MAX_LENGTH = 255
+    _PACKAGE_DEFAULT = 0
+    prod_name = models.CharField(
+        max_length=_PACKAGE_NAME_MAX_LENGTH,
+        default=_PACKAGE_DEFAULT
+    )
+    quantity = models.IntegerField(
+        default=_PACKAGE_DEFAULT
+    )
+    unit_price = models.IntegerField(
+        default=_PACKAGE_DEFAULT
+    )
+
+    def __str__(self):
+        return str(self.prod_name)
+
+
+class Orders(models.Model):
+    _ORDERS_MAX_NAME_LENGTH = 255
+    _ORDERS_DEFAULT_VALUE = 0
+    order_id = models.CharField(
+        max_length=_ORDERS_MAX_NAME_LENGTH,
+        default=_ORDERS_DEFAULT_VALUE
+    )
+    package = models.ManyToManyField(Package)
+    is_cod = models.BooleanField(
+        default=False
+    )
+
+    def __str__(self):
+        return str(self.order_id)

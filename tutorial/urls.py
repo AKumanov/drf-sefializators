@@ -3,7 +3,7 @@ from . import views
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework import renderers
 
-from .views import SnippetViewSet, UserViewSet
+from .views import SnippetViewSet, UserViewSet, OrderViewSet
 
 snippet_list = SnippetViewSet.as_view({
     'get': 'list',
@@ -11,6 +11,18 @@ snippet_list = SnippetViewSet.as_view({
 })
 
 snippet_detail = SnippetViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
+    'delete': 'destroy',
+})
+
+orders_list = OrderViewSet.as_view({
+    'get': 'list',
+    'post': 'create',
+})
+
+orders_detail = OrderViewSet.as_view({
     'get': 'retrieve',
     'put': 'update',
     'patch': 'partial_update',
@@ -31,6 +43,8 @@ user_detail = UserViewSet.as_view({
 
 urlpatterns = [
     path('snippets/', snippet_list, name='snippet-list'),
+    path('orders/', orders_list, name='orders-list'),
+    path('orders/<int:pk>/', orders_detail, name='orders-detail'),
     path('snippets/<int:pk>/', snippet_detail, name='snippet-detail'),
     path('users/', user_list, name='user-list'),
     path('users/<int:pk>/', user_detail, name='user-detail'),

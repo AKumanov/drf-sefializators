@@ -2,7 +2,63 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from tutorial.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES
+from tutorial.models import Snippet, LANGUAGE_CHOICES, STYLE_CHOICES, Package, Orders
+
+
+class PackageSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = Package
+        fields = '__all__'
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    package = PackageSerializer(many=True)
+
+    @staticmethod
+    def get_or_create_packages(packages):
+        package_ids = []
+        for package in packages:
+            package_instance, created = Package.objects.get_or_create(
+                pk=package.get('id'),
+                defaults=package
+            )
+            package_ids.append(package_instance.pk)
+        return package_ids
+
+    @staticmethod
+    def create_or_update_packages(packages):
+        package_ids = []
+        for package in packages:
+            package_instance, created = Package.objects.update_or_create(
+                pk=package.get('id'),
+                defaults=package
+            )
+            package_ids.append(package_instance.pk)
+        return package_ids
+
+    def create(self, validated_data):
+        package = validated_data.pop('package', [])
+        order = Orders.objects.create(**validated_data)
+        order.package.set(self.get_or_create_packages(package))
+        return order
+
+    def update(self, instance, validated_data):
+        package = validated_data.pop('package', [])
+        instance.package.set(self.create_or_update_packages(package))
+        fields = ['order_id', 'is_cod']
+        for field in fields:
+            try:
+                setattr(instance, field, validated_data[field])
+            except KeyError:  # validated_data may not contain fields during HTTP PATCH request
+                pass
+        instance.save()
+        return instance
+
+    class Meta:
+        model = Orders
+        fields = '__all__'
 
 
 class SnippetSerializer(serializers.HyperlinkedModelSerializer):
